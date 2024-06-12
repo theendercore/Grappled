@@ -1,2 +1,2 @@
-# The TeamVoided Template
-Template mod by TeamVoided
+# Grappled
+A mod inspired by Terraria's Grappling Hooks.
