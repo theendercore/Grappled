@@ -23,10 +23,11 @@ class GrapplingHookItem(settings: Settings) : Item(settings) {
                 head.setPosition(pos.x, pos.y, pos.z)
                 world.spawnEntity(head)
             }
+
             HitResult.Type.ENTITY -> {}
         }
         user.sendMessage(Text.of(msg), true)
-        println(msg)
+        if (msg.isNotEmpty()) println(msg)
         return TypedActionResult.success(stack, world.isClient)
 
         return super.use(world, user, hand)

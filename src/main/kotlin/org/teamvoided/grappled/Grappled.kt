@@ -7,7 +7,7 @@ import org.teamvoided.grappled.init.GapItems
 
 @Suppress("unused")
 object Grappled {
-    const val MODID = "template"
+    const val MODID = "grappled"
 
     @JvmField
     val log: Logger = LoggerFactory.getLogger(Grappled::class.simpleName)
