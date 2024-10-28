@@ -1,4 +1,4 @@
-package org.teamvoided.grappled.entities
+package org.teamvoided.grappled.entities.renderer
 
 import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.client.MinecraftClient
@@ -19,7 +19,8 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.Axis
 import net.minecraft.util.math.MathHelper.lerp
 import net.minecraft.util.math.Vec3d
-import org.teamvoided.grappled.util.GapRenderLayers
+import org.teamvoided.grappled.entities.GrapplingHookHeadEntity
+import org.teamvoided.grappled.util.sign
 import kotlin.math.acos
 import kotlin.math.atan2
 
@@ -45,9 +46,10 @@ class GrapplingHookHeadEntityRenderer(ctx: EntityRendererFactory.Context) :
             entityLight, OverlayTexture.DEFAULT_UV,
             matrices, vertexConsumers, entity.world, 0
         )
-
+        var msg = ""
         if (owner != null) {
-            if (owner is ClientPlayerEntity) owner.sendMessage(Text.of("$entityLight | $entityLight"), true)
+//            msg += "$entityLight | $entityLight"
+            msg += "pos: ${entity.pos.subtract(owner.pos).sign().multiply(0.1)}"
 
             matrices.push()
             matrices.translate(0.21, 0.35, 0.015)
@@ -64,11 +66,15 @@ class GrapplingHookHeadEntityRenderer(ctx: EntityRendererFactory.Context) :
             val length = subtracted.length().toFloat()
             val normalized = subtracted.normalize()
 
-            val o = atan2(normalized.z, normalized.x).toFloat()
-            matrices.rotate(Axis.Y_POSITIVE.rotationDegrees((1.5707964F - o) * 57.295776F))
-            matrices.rotate(Axis.X_POSITIVE.rotationDegrees(acos(normalized.y).toFloat() * 57.295776F))
+            val yAngle = ((1.5707964F - atan2(normalized.z, normalized.x).toFloat()) * 57.295776F) + 180f
+//            msg += " | yAngle: $yAngle"
 
-            val vertexConsumer = vertexConsumers.getBuffer(GapRenderLayers.getGrapplingHookLayer(CHAIN_TEXTURE))
+            matrices.rotate(Axis.Y_POSITIVE.rotationDegrees(yAngle))
+            val xAngle = acos(normalized.y).toFloat() * -57.295776F
+            matrices.rotate(Axis.X_POSITIVE.rotationDegrees(xAngle))
+            msg += " | yAngle: $xAngle"
+
+            val vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(CHAIN_TEXTURE))
             val entry = matrices.peek()
 
             vertexConsumer.vertex(entry, 0.093f, 0.0f, 0f, entityLight, 0.0f, 0f)
@@ -81,6 +87,8 @@ class GrapplingHookHeadEntityRenderer(ctx: EntityRendererFactory.Context) :
             vertexConsumer.vertex(entry, 0f, length, 0.093f, entityLight, 0.375f, length)
             vertexConsumer.vertex(entry, 0f, 0.0f, 0.093f, entityLight, 0.375f, 0f)
             matrices.pop()
+
+            if (owner is ClientPlayerEntity) owner.sendMessage(Text.of("$msg | angle: $yAngle"), true)
         }
     }
 
@@ -96,12 +104,12 @@ class GrapplingHookHeadEntityRenderer(ctx: EntityRendererFactory.Context) :
     private fun VertexConsumer.vertex(
         entry: MatrixStack.Entry, x: Float, y: Float, z: Float, light: Int, u: Float, v: Float
     ) {
-        this.method_56824(entry, x, y, z)
-            .method_1336(255, 255, 255, 255)
-            .method_22913(u, v)
-            .method_22922(OverlayTexture.DEFAULT_UV)
-            .method_60803(light)
-            .method_60831(entry, 1.0f, 1.0f, 1.0f)
+        this.xyz(entry, x, y, z)
+            .color(255, 255, 255, 255)
+            .uv0(u, v)
+            .uv1(OverlayTexture.DEFAULT_UV)
+            .uv2(light)
+            .normal(entry, 1.0f, 1.0f, 1.0f)
 
     }
 
@@ -110,6 +118,5 @@ class GrapplingHookHeadEntityRenderer(ctx: EntityRendererFactory.Context) :
 
     companion object {
         val CHAIN_TEXTURE: Identifier = Identifier.ofDefault("textures/block/chain.png")
-        fun map(value: Float): Int = (value * 0xffffff / 1.0).toInt()
     }
 }

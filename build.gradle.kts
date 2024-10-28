@@ -72,7 +72,7 @@ tasks {
         options.release.set(targetJavaVersion)
     }
 
-    withType<KotlinCompile> {
+    withType<KotlinCompile>().all {
         compilerOptions.jvmTarget = JvmTarget.JVM_21
     }
 

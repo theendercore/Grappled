@@ -12,6 +12,7 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.world.World
 import org.teamvoided.grappled.init.GapEntityTypes
+import org.teamvoided.grappled.util.sign
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
@@ -64,6 +65,11 @@ class GrapplingHookHeadEntity(entityType: EntityType<GrapplingHookHeadEntity>, w
 //                println("owner: $serverOwner")
             }
             printOnce++
+            val owner = fetchOwner()
+            if (owner != null) {
+                owner.addVelocity(this.pos.subtract(owner.pos).sign().multiply(0.1))
+                owner.velocityModified = true
+            }
         }
     }
 
